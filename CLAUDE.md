@@ -18,3 +18,18 @@
 
   ## Not To Confuse
   This CLAUDE.md describes the *framework project*. The framework *generates different* CLAUDE.md files for end users based on their onboarding answers.
+
+  ## Memory Server
+
+  MCP memory server is available for the knowledge graph.
+
+  **When to use:**
+  - Storing entities discovered during development (patterns, decisions)
+  - NOT for storing framework design (that's in ARCHITECTURE.md)
+
+  **Entity naming:** lowercase, hyphenated (e.g., `onboarding-phase-1`, `skill-pattern`)
+
+  **Commands:**
+  - `mcp__memory__search_nodes(query)` - Find entities
+  - `mcp__memory__create_entities(entities)` - Add new
+  - `mcp__memory__add_observations(observations)` - Append to existing
