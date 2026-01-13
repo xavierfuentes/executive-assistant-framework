@@ -1,0 +1,8 @@
+# Don't read generated outputs during development
+output/
+generated/
+
+# Standard ignores
+node_modules/
+.git/
+*.log
