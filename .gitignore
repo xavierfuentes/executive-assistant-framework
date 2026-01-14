@@ -1,0 +1,12 @@
+# User-specific runtime files
+.claude/memory.jsonl
+.claude/settings.json
+.claude/settings.local.json
+.mcp.json
+
+# Generated command centres (for testing)
+sandbox/
+generated/
+
+# OS files
+.DS_Store
