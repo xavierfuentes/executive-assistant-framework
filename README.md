@@ -1,6 +1,6 @@
 # Executive Assistant Framework
 
-A self-bootstrapping AI command centre that any executive can configure through conversation.
+A self-bootstrapping AI command centre for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that any executive can configure through conversation.
 
 ## What This Is
 
@@ -174,8 +174,8 @@ To test the framework:
 
 ## Requirements
 
-- Claude Code CLI
-- MCP memory server (for knowledge graph)
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- MCP memory server configured (for knowledge graph)
 
 ## Contributing
 
