@@ -1,6 +1,7 @@
 ---
 name: humanize
 description: Transform AI-generated text to match user's voice and communication style. Use when drafting messages, emails, documents, or any external communication that should sound like the user wrote it.
+user-invocable: true
 ---
 
 # Humanize

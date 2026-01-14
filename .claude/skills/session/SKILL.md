@@ -1,6 +1,7 @@
 ---
 name: session
 description: Context management across sessions. Use at session start (/resume) to restore context, and before ending (/preserve) to capture state for continuity. Also handles session handoffs and context summaries.
+user-invocable: true
 ---
 
 # Session Management

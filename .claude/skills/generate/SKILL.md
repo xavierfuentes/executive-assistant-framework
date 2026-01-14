@@ -1,6 +1,7 @@
 ---
 name: generate
 description: Generate command centre from onboarding answers. Use after completing onboarding to create CLAUDE.md, skills, people files, and seed memory graph. Invoke with target directory path.
+user-invocable: true
 ---
 
 # Generate Command Centre
