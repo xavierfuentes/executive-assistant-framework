@@ -158,6 +158,20 @@ See `.claude/bootstrap/calibration.md` for full calibration guide.
 4. **Single authority** - One file per data type (actions.md = all actions)
 5. **Hooks remind, never block** - Suggestions only, you decide
 
+## Testing
+
+To test the framework:
+
+1. Run onboarding and complete all phases (~15-20 min)
+2. Generate to a sandbox: `/generate ./sandbox`
+3. Check the generated files make sense
+4. Try `/resume` in the generated directory
+
+**Feedback wanted:**
+- Does onboarding flow naturally?
+- Are extracted details correct?
+- Do generated skills match your responsibilities?
+
 ## Requirements
 
 - Claude Code CLI
