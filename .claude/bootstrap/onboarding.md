@@ -11,13 +11,34 @@ Guide for onboarding a new executive to generate their personalised command cent
 
 ---
 
-## Phase 0: Document Collection
+## Phase 0: Language & Document Collection
 
-**Purpose:** Gather existing materials to minimise questions.
+**Purpose:** Set language preference and gather existing materials.
 
-### Script
+### Language Selection
 
 ```
+Welcome! I'm going to help you set up your AI command centre.
+
+First, what language would you like me to use?
+
+1. English (British)
+2. English (American)
+3. Español
+4. Other (please specify)
+
+This will be used for all communications and generated content.
+```
+
+Store selection in answers as `Preferences > Communication > Language`.
+
+If user selects a non-English language, continue onboarding in that language.
+
+### Document Collection Script
+
+```
+[In selected language]
+
 Welcome! I'm going to help you set up your AI command centre.
 
 To make this quick, share any of these you have - just paste text or drop files:

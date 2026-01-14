@@ -113,7 +113,7 @@ Captured data from onboarding conversation. This file is parsed to generate the 
 
 ### Communication
 
-- **Language:** British English
+- **Language:** {English (British) | English (American) | Español | Other}
 - **Tone:**
 - **Format:**
 - **Detail level:**
