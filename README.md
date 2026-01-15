@@ -14,29 +14,46 @@ The result: an AI assistant that knows your responsibilities, your team, your pr
 
 ## Quick Start
 
-### 1. Run Onboarding
+### Prerequisites
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
+- MCP memory server configured (optional, for knowledge graph features)
+
+### 1. Start Claude in this directory
+
+```bash
+cd executive-assistant-framework
+claude
+```
+
+### 2. Run onboarding
+
+Once Claude is running, type:
 
 ```
 /onboarding
 ```
 
-Or paste your CV/job description and let the system extract what it needs.
+This starts a ~15-20 minute conversation where Claude learns about your role, team, and preferences. You can paste your CV or job description to speed this up.
 
-### 2. Generate Your Command Centre
+### 3. Generate your command centre
 
-After completing onboarding:
+After completing onboarding, type:
 
 ```
 /generate ./my-command-centre
 ```
 
-### 3. Start Using It
+**Why a separate directory?** This framework is a reusable template. The `/generate` command transforms your onboarding answers into a personalised command centre with your own `CLAUDE.md`, skills, and people files. You keep the framework intact and get your own working directory.
 
-Navigate to your generated directory and:
+### 4. Start using your command centre
 
+```bash
+cd my-command-centre
+claude
 ```
-/resume
-```
+
+Then type `/resume` to begin your first session. From now on, this is where you work - Claude reads your personalised `CLAUDE.md` and knows your context.
 
 ## What Gets Generated
 
@@ -162,20 +179,18 @@ See `.claude/bootstrap/calibration.md` for full calibration guide.
 
 To test the framework:
 
-1. Run onboarding and complete all phases (~15-20 min)
-2. Generate to a sandbox: `/generate ./sandbox`
-3. Check the generated files make sense
-4. Try `/resume` in the generated directory
+1. Start Claude in the framework directory: `cd executive-assistant-framework && claude`
+2. Run `/onboarding` and complete all phases (~15-20 min)
+3. Generate to a sandbox: `/generate ./sandbox`
+4. Check the generated files make sense
+5. Start Claude in the sandbox: `cd sandbox && claude`
+6. Try `/resume` to begin a session
 
 **Feedback wanted:**
+
 - Does onboarding flow naturally?
 - Are extracted details correct?
 - Do generated skills match your responsibilities?
-
-## Requirements
-
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- MCP memory server configured (for knowledge graph)
 
 ## Contributing
 
