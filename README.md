@@ -17,7 +17,7 @@ The result: an AI assistant that knows your responsibilities, your team, your pr
 ### Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- MCP memory server configured (optional, for knowledge graph features)
+- MCP servers configured (see [MCP Server Setup](#mcp-server-setup) below)
 
 ### 1. Start Claude in this directory
 
@@ -174,6 +174,55 @@ See `.claude/bootstrap/calibration.md` for full calibration guide.
 3. **Observable verification** - Every workflow has checkable criteria
 4. **Single authority** - One file per data type (actions.md = all actions)
 5. **Hooks remind, never block** - Suggestions only, you decide
+
+## MCP Server Setup
+
+The framework uses two MCP (Model Context Protocol) servers for enhanced functionality:
+
+### Memory Server
+
+Provides a persistent knowledge graph for tracking people, relationships, and observations over time.
+
+**Install:**
+
+```bash
+claude mcp add memory -- npx -y @modelcontextprotocol/server-memory
+```
+
+**What it enables:**
+
+- People you work with stored as entities
+- Relationships tracked (reports-to, works-with)
+- Observations accumulated over time
+- Self-improvement pattern detection
+
+### Context7 Server
+
+Provides up-to-date documentation lookup for any programming library.
+
+**Install:**
+
+```bash
+claude mcp add context7 -- npx -y @upstash/context7-mcp
+```
+
+**What it enables:**
+
+- Current documentation for any library
+- Code examples from official sources
+- Answers technical questions with accurate, recent information
+
+### Verifying Setup
+
+After installation, restart Claude Code and check MCP servers are connected:
+
+```bash
+claude mcp list
+```
+
+You should see both `memory` and `context7` listed.
+
+**Note:** The generated command centre includes an `.mcp.json` file with these servers pre-configured.
 
 ## Testing
 

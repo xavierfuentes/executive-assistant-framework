@@ -234,9 +234,31 @@ mkdir -p me
 
 ---
 
+### .mcp.json
+
+MCP server configuration for the generated command centre. Users will be prompted to install these servers when they first run Claude in the directory.
+
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+---
+
 ## Verification
 
 After generation:
+
 - [ ] All directories exist
 - [ ] `work/actions.md` created with Eisenhower matrix structure
 - [ ] `reference/system/improvements.md` created
@@ -244,4 +266,5 @@ After generation:
 - [ ] `reference/company/overview.md` created (even if minimal)
 - [ ] `people/manager.md` placeholder created
 - [ ] `.claude/settings.json` created with hook configuration
+- [ ] `.mcp.json` created with memory and context7 servers
 - [ ] Hook scripts are executable
