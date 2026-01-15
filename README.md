@@ -55,6 +55,8 @@ claude
 
 Then type `/resume` to begin your first session. From now on, this is where you work - Claude reads your personalised `CLAUDE.md` and knows your context.
 
+**Tip:** Open your command centre folder in [Obsidian](https://obsidian.md) for a visual markdown editor with graph view.
+
 ## What Gets Generated
 
 ```
