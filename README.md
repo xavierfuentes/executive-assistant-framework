@@ -12,6 +12,18 @@ This framework creates personalised AI assistants for executives. Instead of gen
 
 The result: an AI assistant that knows your responsibilities, your team, your preferences, and gets better the more you use it.
 
+## Who This Is For
+
+This framework works best for roles with **coordination complexity**:
+
+- **Managers** with direct reports and stakeholders to track
+- **Executives** juggling multiple responsibilities
+- **Project/Product managers** coordinating across teams
+- **Founders** wearing multiple hats
+- **Senior ICs** with cross-functional responsibilities
+
+The framework assumes you have multiple responsibilities, people to manage relationships with, and context worth preserving across sessions. If your work is narrowly focused without much coordination overhead, this may be more structure than you need.
+
 ## Quick Start
 
 ### Prerequisites
