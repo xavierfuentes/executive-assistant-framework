@@ -214,18 +214,17 @@ mkdir -p me
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": {
-          "tool": ["Write", "Edit"],
-          "path": ["people/**/*", "work/**/*"]
-        },
-        "command": ".claude/hooks/check-actions.sh"
-      },
-      {
-        "matcher": {
-          "tool": ["Write", "Edit"],
-          "path": ["people/**/*.md"]
-        },
-        "command": ".claude/hooks/check-memory.sh"
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-actions.sh"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-memory.sh"
+          }
+        ]
       }
     ]
   }

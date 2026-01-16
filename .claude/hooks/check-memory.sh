@@ -3,10 +3,11 @@
 # Trigger: PostToolUse on Write/Edit to people/*.md files
 # Purpose: Remind to update memory graph with new observations about people
 
-TOOL_INPUT="$1"
+# Read JSON input from stdin
+INPUT=$(cat)
 
 # Extract file path from tool input
-FILE_PATH=$(echo "$TOOL_INPUT" | grep -oE '"file_path"\s*:\s*"[^"]*"' | sed 's/"file_path"\s*:\s*"//' | sed 's/"$//')
+FILE_PATH=$(echo "$INPUT" | grep -oE '"file_path"\s*:\s*"[^"]*"' | sed 's/"file_path"\s*:\s*"//' | sed 's/"$//')
 
 # Check if path is a person profile file
 if [[ "$FILE_PATH" =~ ^.*/people/.*\.md$ ]]; then
