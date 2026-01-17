@@ -62,6 +62,40 @@ If no documents provided:
 1. Mark all fields as "needs question"
 2. Move to Phase 1 with full question set
 
+### Handling Extraction Failures
+
+**Critical fields** (must have values before proceeding):
+- Name
+- Title
+- Company
+- Timezone
+
+**When extraction fails:**
+
+1. For each document, track extraction results in `onboarding-state.md`
+2. If 3+ critical fields return "NOT FOUND" from a single document:
+   - Log error to onboarding-state.md Error Log
+   - Switch to questionnaire mode for that document's expected fields
+   - Inform user with extraction failure template (see User Communication Templates)
+
+3. If document parsing completely fails (corrupted, unreadable, wrong format):
+   - Log to Error Log with document type and error
+   - Use document upload issue template
+   - Continue with remaining documents or questionnaire mode
+
+**Questionnaire mode fallback:**
+```
+I couldn't extract enough information from your {document_type}.
+Let me ask a few quick questions instead.
+
+{relevant gap-fill questions from Phase 1}
+```
+
+**State tracking:** After processing each document, update:
+- `onboarding-state.md` Captured Data Summary table
+- `onboarding-state.md` Documents Provided checklist
+- `onboarding-state.md` Last updated timestamp
+
 ---
 
 ## Phase 1: Identity & Role
@@ -457,6 +491,219 @@ Let's start working. What would you like to tackle first?
 
 ---
 
+## Mid-Onboarding Cancellation
+
+**Purpose:** Gracefully handle interruptions and preserve progress.
+
+### Detecting Cancellation
+
+Watch for:
+- Explicit: "stop", "cancel", "pause", "let's continue later", "I need to go"
+- Implicit: Extended silence (if in interactive mode), session ending
+
+### On Explicit Cancellation
+
+1. **Save state immediately:**
+   - Update `onboarding-state.md` with current phase
+   - Set status to "paused"
+   - Update Last updated timestamp
+   - Write any captured but uncommitted answers to Recovery Notes
+
+2. **Confirm to user:**
+   ```
+   No problem - I've saved your progress.
+
+   **Completed:** Phases 0-{n}
+   **Captured:** {summary of what's saved}
+
+   To continue later, just say "resume onboarding" and I'll pick up where we left off.
+   ```
+
+3. **Write partial answers:**
+   - Save any captured data to `answers.md` even if incomplete
+   - Mark incomplete sections clearly
+
+### Incremental Saves
+
+**After each phase completion:**
+- Update `onboarding-state.md` phase checklist
+- Append captured data to `answers.md`
+- Update Captured Data Summary table
+
+**After significant data capture within a phase:**
+- Save to Recovery Notes in `onboarding-state.md`
+- Examples: after extracting from a document, after completing responsibility deep-dive
+
+**Recovery Notes Content:**
+
+When saving to Recovery Notes, capture:
+
+1. **Last Question Asked** - Always update when asking a question
+2. **Partial Responses** - When user gives incomplete answer
+3. **User Clarifications** - When user corrects extracted data
+4. **Special Circumstances** - Any unusual state (pending docs, warnings, deferrals)
+5. **Resume Instructions** - Explicit guidance for continuing
+
+**Item Index Tracking:**
+
+When iterating through lists (responsibilities, people, meetings):
+- Update `Current item index` after completing each item
+- Update `Current item context` with the next item name
+- Add/update row in In-Progress Item Tracking table
+
+**Distinction: Partial Responses vs Recovery Notes**
+
+- **Partial Responses** (in onboarding-state.md): Tracks incomplete answers to individual questions during the current phase. Use when user gives an answer that needs follow-up (e.g., "good retention" without a metric).
+
+- **Recovery Notes** (in onboarding-state.md): Captures full session context for resuming after interruption. Use when saving state before pause/timeout.
+
+Both are updated incrementally, but serve different purposes:
+- Partial Responses → helps complete the current question
+- Recovery Notes → helps resume the entire session
+
+---
+
+## Resume Onboarding Workflow
+
+**Purpose:** Continue interrupted onboarding sessions.
+
+### Trigger Conditions
+
+Resume workflow activates when:
+1. User explicitly says "resume onboarding", "continue onboarding", or similar
+2. `onboarding-state.md` exists with status "active" or "paused" at session start
+3. User attempts to start onboarding but state file shows incomplete session
+
+### Resume Process
+
+**Step 1: Detect and Load State**
+```
+Check for: .claude/bootstrap/onboarding-state.md
+If exists and status != "complete":
+  - Load current phase
+  - Load captured data summary
+  - Load recovery notes
+```
+
+**Step 2: Prompt User**
+```
+I found an incomplete onboarding session from {last_updated}.
+
+**Progress:** Phases 0-{n} complete
+**Captured:** {data_summary}
+
+How would you like to proceed?
+
+1. **Continue** - Pick up where we left off (Phase {n+1})
+2. **Review** - Show me what's captured, then continue
+3. **Start fresh** - Begin a new onboarding (previous data will be archived)
+```
+
+**Step 3: Handle User Choice**
+
+*Continue:*
+- Load answers.md context
+- Resume at the next incomplete phase
+- Restore any Recovery Notes context
+
+*Review:*
+- Display current answers.md contents formatted nicely
+- Ask for corrections
+- Then continue
+
+*Start fresh:*
+- Archive current state: rename to `onboarding-state-{timestamp}.md`
+- Archive current answers: rename to `answers-{timestamp}.md`
+- Begin Phase 0
+
+**Step 4: Resume Context**
+
+When resuming mid-phase:
+```
+Let's continue with Phase {n}: {phase_name}.
+
+{Recap last question or context from Recovery Notes}
+
+{Next question or prompt}
+```
+
+### State File Management
+
+| Event | Action |
+|-------|--------|
+| Onboarding starts | Create `onboarding-state.md` with status "active" |
+| Phase completes | Update checklist, status remains "active" |
+| User pauses | Set status to "paused" |
+| Error occurs | Set status to "error", log to Error Log |
+| Generation complete | Set status to "complete", current phase to "complete" |
+| User starts fresh | Archive old files, create new state |
+
+---
+
+## User Communication Templates
+
+### Extraction Failure Template
+
+```
+I had trouble extracting information from your {document_type}.
+
+**What I found:** {partial_results_if_any}
+**What I couldn't find:** {missing_fields}
+
+This sometimes happens with {reason: e.g., "scanned PDFs", "images of text", "heavily formatted documents"}.
+
+Let me ask a few quick questions to fill in the gaps:
+{relevant questions}
+```
+
+### Document Upload Issue Template
+
+```
+I wasn't able to read that {document_type}.
+
+**Possible reasons:**
+- The file might be corrupted or in an unsupported format
+- If it's a screenshot, the image quality might be too low
+- Password-protected documents can't be read
+
+**Options:**
+1. Try uploading a different format (PDF, plain text, or paste the content directly)
+2. Skip this document and I'll ask questions instead
+
+Which would you prefer?
+```
+
+### Save Confirmation Template
+
+```
+Got it - I've saved everything so far.
+
+**Progress saved:**
+- Phase {n} complete
+- {key_data_points} captured
+
+You can close this session and say "resume onboarding" anytime to continue.
+```
+
+### Resume Prompt Template
+
+```
+Welcome back! I found your previous onboarding session.
+
+**Last active:** {timestamp}
+**Progress:** {completed_phases} of 6 phases complete
+**Status:** {status_description}
+
+{if error: "Note: The previous session encountered an issue: {error_description}"}
+
+Would you like to:
+1. **Continue** from Phase {next_phase}
+2. **Review** what I have so far
+3. **Start fresh** (previous progress will be archived)
+```
+
+---
+
 ## Error Handling
 
 ### User Wants to Skip Sections
@@ -481,6 +728,28 @@ If more than 2 questions answered with minimal detail:
 I've got enough to get started. We can fill in details as we work together -
 the system learns over time. Want me to generate with what we have?
 ```
+
+### Error Log Resolution Examples
+
+When logging errors to `onboarding-state.md`, include actionable resolutions:
+
+| Error Type | Example Error | Example Resolution |
+|------------|---------------|-------------------|
+| Extraction failure | "CV extraction returned NOT FOUND for 4+ fields" | "Switched to questionnaire mode for identity fields" |
+| Document unreadable | "org_chart.png parse failed - image corrupted" | "User to re-upload; proceeding with verbal description" |
+| Validation failure | "Timezone 'London' not valid IANA format" | "Clarified with user: Europe/London" |
+| Inconsistent data | "Manager name differs between CV and JD" | "User confirmed: James Wright (CV correct)" |
+| User skip request | "User skipped stakeholder deep-dive" | "Marked for post-onboarding enrichment" |
+| Session timeout | "No response for 10+ minutes" | "State saved; awaiting resume" |
+| MCP failure | "Memory server unavailable during seeding" | "Remediation task added to actions.md" |
+| Partial data | "Direct report missing tenure info" | "Created entity with 'tenure: unknown' observation" |
+
+**Resolution Status Indicators:**
+
+- `✓ Resolved:` Issue fixed, onboarding continued normally
+- `→ Deferred:` Issue logged for later, proceeding without
+- `⚠ Partial:` Workaround applied, may need follow-up
+- `✗ Blocked:` Could not proceed, user action required
 
 ---
 

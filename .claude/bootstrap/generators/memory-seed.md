@@ -17,6 +17,38 @@ The memory graph is the persistent knowledge store that grows over time. Seeding
 | `relationship` | Inferred from roles | Connections between people |
 | `user` | Identity section | The user themselves |
 
+## Relationship Type Schema
+
+| Type | From | To | Inverse | Read As | Use When |
+|------|------|----|---------|---------|----------|
+| `reports-to` | subordinate | superior | `manages` | "X reports to Y" | Formal reporting line |
+| `manages` | superior | subordinate | `reports-to` | "X manages Y" | Formal reporting line |
+| `works-with` | person | peer | `works-with` | "X works with Y" | Peer at same level, regular interaction |
+| `collaborates-with` | person | collaborator | `collaborates-with` | "X collaborates with Y" | Cross-functional partner on specific responsibilities |
+
+**Relationship Type Guidance:**
+
+- **`works-with`**: Use for peers at the same organisational level with broad, ongoing interaction. Examples: fellow VPs, leadership team members, adjacent team leads.
+
+- **`collaborates-with`**: Use for people you work with on specific responsibilities or projects, regardless of level. Examples: the Talent partner for your hiring responsibility, the Finance lead for your budget planning.
+
+**Bidirectional Rule:** For all relationship types, create BOTH directions:
+- User → Manager: `reports-to`
+- Manager → User: `manages`
+
+## Entity Naming Convention
+
+### Slug Rules
+- Lowercase only
+- Hyphens for word separation
+- Maximum 50 characters
+- Must match: `^[a-z][a-z0-9-]{0,48}[a-z0-9]?$`
+
+### Handling Name Collisions
+If two entities would have the same name:
+1. Append role: `john-smith-engineering`
+2. Add disambiguation observation
+
 ---
 
 ## Entity Templates
@@ -135,44 +167,69 @@ Observations:
 
 After creating entities, establish relationships:
 
-### Manager Relationship
+### Manager Relationship (Bidirectional)
 
+Create both directions:
 ```
 Relation:
   from: {user-slug}
   to: {manager-slug}
   type: reports-to
+
+Relation:
+  from: {manager-slug}
+  to: {user-slug}
+  type: manages
 ```
 
-### Direct Report Relationships
+### Direct Report Relationships (Bidirectional)
 
-For each direct report:
+For each direct report, create both directions:
 ```
 Relation:
   from: {report-slug}
   to: {user-slug}
   type: reports-to
+
+Relation:
+  from: {user-slug}
+  to: {report-slug}
+  type: manages
 ```
 
-### Peer Relationships
+### Peer Relationships (Bidirectional)
 
-For stakeholders marked as peers:
+For stakeholders marked as peers, create BOTH directions:
 ```
 Relation:
   from: {user-slug}
   to: {stakeholder-slug}
   type: works-with
+
+Relation:
+  from: {stakeholder-slug}
+  to: {user-slug}
+  type: works-with
 ```
 
-### Collaborator Relationships
+Note: Although `works-with` is semantically symmetric, the memory graph stores directed edges. Creating both directions ensures queries from either entity return the peer relationship.
 
-For stakeholders from responsibility collaborators:
+### Collaborator Relationships (Bidirectional)
+
+For people identified as collaborators on specific responsibilities:
 ```
 Relation:
   from: {user-slug}
   to: {collaborator-slug}
   type: collaborates-with
+
+Relation:
+  from: {collaborator-slug}
+  to: {user-slug}
+  type: collaborates-with
 ```
+
+Note: `collaborates-with` is distinct from `works-with`. Use `collaborates-with` for responsibility-specific partnerships (e.g., "Talent team" for hiring), and `works-with` for general peer relationships (e.g., "VP Product").
 
 ---
 
@@ -311,25 +368,65 @@ mcp__memory__create_entities([
       "Relationship: Peer to sarah-chen",
       "Profile: people/stakeholders/amanda-liu.md"
     ]
+  },
+  {
+    name: "talent-team-lead",
+    entityType: "person",
+    observations: [
+      "Role: Talent Acquisition Lead",
+      "Collaborates on: Engineering Hiring responsibility",
+      "Profile: people/stakeholders/talent-team-lead.md"
+    ]
   }
 ])
 
-// Step 2: Create relationships
+// Step 2: Create relationships (bidirectional for reporting lines)
 mcp__memory__create_relations([
+  // User → Manager (reports-to)
   {
     from: "sarah-chen",
     to: "james-wright",
     relationType: "reports-to"
   },
+  // Manager → User (manages) - inverse direction
+  {
+    from: "james-wright",
+    to: "sarah-chen",
+    relationType: "manages"
+  },
+  // Direct report → User (reports-to)
   {
     from: "mike-johnson",
     to: "sarah-chen",
     relationType: "reports-to"
   },
+  // User → Direct report (manages) - inverse direction
+  {
+    from: "sarah-chen",
+    to: "mike-johnson",
+    relationType: "manages"
+  },
+  // Peer relationship (bidirectional for query completeness)
   {
     from: "sarah-chen",
     to: "amanda-liu",
     relationType: "works-with"
+  },
+  {
+    from: "amanda-liu",
+    to: "sarah-chen",
+    relationType: "works-with"
+  },
+  // Collaborator relationship (responsibility-specific partnership)
+  {
+    from: "sarah-chen",
+    to: "talent-team-lead",
+    relationType: "collaborates-with"
+  },
+  {
+    from: "talent-team-lead",
+    to: "sarah-chen",
+    relationType: "collaborates-with"
   }
 ])
 ```
@@ -368,6 +465,35 @@ If person data is incomplete:
 - Create entity with available observations
 - Add observation: "Profile incomplete - needs enrichment"
 - Entity can be updated later via `add_observations`
+
+**Partial Entity Relationships:**
+
+When an entity is created with incomplete data (marked "Profile incomplete - needs enrichment"):
+- **Still create relationships** for that entity if the relationship is known
+- Add observation to the relationship context: "Note: Related entity has incomplete profile"
+- The relationship enables discovery even if full details are missing
+
+Example:
+```javascript
+// Entity with partial data
+{
+  name: "incomplete-stakeholder",
+  entityType: "person",
+  observations: [
+    "Role: Unknown - needs enrichment",
+    "Profile incomplete - needs enrichment"
+  ]
+}
+
+// Relationship still created
+{
+  from: "sarah-chen",
+  to: "incomplete-stakeholder",
+  relationType: "works-with"
+}
+```
+
+This ensures the knowledge graph captures known connections even when entity details are sparse.
 
 ---
 

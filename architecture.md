@@ -89,10 +89,21 @@
   ### Memory (Knowledge Graph)
   MCP server storing entities and relationships:
   - People (team, stakeholders, manager)
-  - Relationships (reports-to, works-with)
+  - Relationships with explicit directionality:
+    - `reports-to` (subordinate → superior)
+    - `manages` (superior → subordinate) - inverse of reports-to
+    - `works-with` (peer ↔ peer) - symmetric (stored bidirectionally)
+    - `collaborates-with` (person ↔ collaborator) - responsibility-specific partnerships
   - Observations (facts learned over time)
 
-  Append-only - never delete, always grow.
+  **Bidirectional Rule:** All relationships require BOTH directions stored explicitly:
+  - Reporting: `reports-to` AND `manages`
+  - Peers: `works-with` in both directions
+  - Collaborators: `collaborates-with` in both directions
+
+  **Entity Naming:** lowercase, hyphenated, max 50 chars. Pattern: `^[a-z][a-z0-9-]{0,48}[a-z0-9]?$`
+
+  **Cleanup:** Improvement entities archived to `reference/system/improvements.md` after 30 days, then deleted via `mcp__memory__delete_entities`.
 
   ### Self-Improvement (Organic)
 Not a skill to invoke - a behavioural layer woven into CLAUDE.md.

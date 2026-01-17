@@ -72,8 +72,22 @@ When approved:
 
 ### Memory Entity Lifecycle
 
+**States:**
 ```
-observed → maturing → proposed → implemented (or declined)
+observed → maturing (3+ observations) → proposed → implemented | declined
 ```
 
-Implemented improvements archived to `reference/system/improvements.md` after 30 days, then deleted from memory graph.
+**Improvement Entity Naming:**
+- Format: `improve-{action-slug}`
+- Slug: lowercase, hyphenated, verb-based (e.g., `improve-automate-weekly-report`)
+- Maximum 50 characters
+
+**Observation Format:**
+```
+Observed: {YYYY-MM-DD} - {what happened}, {context}
+State: proposed | implemented | declined
+```
+
+**Cleanup (30 days after implementation):**
+1. Archive to `reference/system/improvements.md`
+2. Delete from memory: `mcp__memory__delete_entities({entityNames: ["{entity}"]})`

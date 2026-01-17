@@ -26,6 +26,33 @@ Provide rapid context before important meetings. Instead of scrambling to rememb
 - When user asks "what do I need to know for [meeting]?"
 - Before presenting or making decisions
 
+## Input Specification
+
+### Invocation Methods
+
+| Method | Example | Resolution |
+|--------|---------|------------|
+| Explicit command | `/health-check Q4 Board Review` | Direct meeting name |
+| Natural language | "What do I need to know for my Sarah 1:1?" | Extract meeting/person |
+| Contextual | "Prep me for my 2pm" | Query calendar for time |
+
+### Meeting Context Resolution
+
+1. **Parse invocation** - Extract meeting name, attendee names, or time
+2. **Calendar lookup** (if MCP available) - Query for matching meetings
+3. **Memory lookup** - Check for recurring meeting patterns
+4. **User clarification** - If ambiguous, ask: "Which meeting?"
+5. **Minimal input** - If calendar unavailable, ask: "Who's in this meeting?"
+
+### When Meeting Details Unknown
+
+**Minimum required:** At least one attendee name OR meeting topic
+
+**Process:**
+1. Ask: "Who's in the meeting?"
+2. Ask: "What's it about?" (optional)
+3. Proceed with available information
+
 ## Execution
 
 This agent runs the following in parallel, filtered by meeting context:
@@ -171,3 +198,26 @@ Adapts based on:
 - **Attendee relationship:** Report, peer, senior, external
 - **Formality:** Leadership meeting vs casual sync
 - **User preferences:** Some want detailed, some want minimal
+
+## Stop Hook Behaviour
+
+### Decision Handling
+
+| Decision | Action |
+|----------|--------|
+| `stop` | Complete normally, present meeting brief |
+| `continue` | Address `reason`, re-verify (max 3 cycles) |
+
+### Continue Cycle Resolution
+
+| Pending Item | Recovery Action |
+|--------------|-----------------|
+| Meeting context not identified | Ask user for meeting details |
+| Relevant open items not surfaced | Search actions.md with broader filters |
+| People context not loaded | Query memory graph or ask user |
+| Output not concise/actionable | Condense and add action items |
+
+### Forced Stop Conditions
+- 3 continue cycles exhausted
+- 60-second timeout on verification
+- User explicitly requests stopping

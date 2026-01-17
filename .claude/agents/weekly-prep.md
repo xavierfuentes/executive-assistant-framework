@@ -25,6 +25,48 @@ Start each week with clarity. This agent aggregates across all responsibility ar
 - When user asks for weekly overview
 - After returning from time off
 
+## Input Specification
+
+### Invocation Methods
+
+| Method | Example | Resolution |
+|--------|---------|------------|
+| Explicit command | `/weekly-prep` | Run immediately |
+| Natural language | "Let's plan the week" or "What's my week look like?" | Extract weekly planning intent |
+| Contextual | "It's Monday, help me get organised" | Recognise day-of-week trigger |
+| Scheduled | First working day after weekend | Auto-suggest if pattern established |
+
+### Default Behaviour
+
+When invoked without parameters:
+
+1. **Check current day** - Confirm it's an appropriate day for weekly planning
+2. **Locate sources** - Verify `work/actions.md` and skill files exist
+3. **Calendar access** - Check if calendar MCP is available; if not, prepare to ask user
+4. **Proceed** - Run full execution with available data
+
+### When Sources Unavailable
+
+**If no actions.md exists:**
+- Create minimal version or ask user for current priorities
+
+**If calendar unavailable:**
+- Ask: "What key meetings do you have this week?"
+- Note: Can also list meetings from user's verbal summary
+
+**If no skill files exist:**
+- Ask: "What are your main responsibility areas?"
+- Create mental model for responsibility sweep
+
+### When to Prompt User
+
+| Scenario | Prompt |
+|----------|--------|
+| First run ever | "This looks like your first weekly prep. Want me to walk through setup?" |
+| Mid-week invocation | "It's {day} - shall I run a mid-week check instead?" |
+| No calendar access | "I don't have calendar access. What meetings do you have this week?" |
+| Empty actions.md | "Your actions list is empty. What are your current priorities?" |
+
 ## Execution
 
 This agent runs the following in parallel:
@@ -134,3 +176,25 @@ This agent adapts based on onboarding:
 
 If user has no direct reports, skip 1:1 context section.
 If user has board meetings this week, add dedicated section.
+
+## Stop Hook Behaviour
+
+### Decision Handling
+
+| Decision | Action |
+|----------|--------|
+| `stop` | Complete normally, present output |
+| `continue` | Address `reason`, re-verify (max 3 cycles) |
+
+### Continue Cycle Resolution
+
+| Pending Item | Recovery Action |
+|--------------|-----------------|
+| Responsibility not reviewed | Load skill file, summarise |
+| Actions.md not updated | Write pending items |
+| Meetings not identified | Ask user or note unavailable |
+| Overdue not flagged | Search for past-due dates |
+
+### Forced Stop Conditions
+- 3 continue cycles exhausted
+- 60-second timeout on verification
